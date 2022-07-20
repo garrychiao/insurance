@@ -1,9 +1,10 @@
 export const pet_insurance_translation = {
-    name: '名稱'	,
+    name: '名稱',
     medical_fee: '醫療費用'	,
     appointment: '門診',
     admission: '住院',
     surgery: '手術',
+    max_medical_fee: '醫療費用上限',
     harm: '侵權',
     accommodation: '寄宿',
     seek: '協尋',
