@@ -1,0 +1,16 @@
+export const pet_insurance_translation = {
+    name: '名稱'	,
+    medical_fee: '醫療費用'	,
+    appointment: '門診',
+    admission: '住院',
+    surgery: '手術',
+    harm: '侵權',
+    accommodation: '寄宿',
+    seek: '協尋',
+    funeral: '喪葬',
+    regain: '重新取得費用',
+    trip_cancel: '旅遊行程取消費用',
+    valid_age: '投保年齡限制',
+    max_weekly_renewal: '續保年齡限制',
+    certificates: '身份認證',
+}
