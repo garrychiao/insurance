@@ -1,5 +1,8 @@
 export const pet_insurance_translation = {
     name: '名稱',
+    insurance_category: '保險類別',
+    sub_category: '子類別',
+    issued_by: '發行單位',
     medical_fee: '醫療費用'	,
     appointment: '門診',
     admission: '住院',

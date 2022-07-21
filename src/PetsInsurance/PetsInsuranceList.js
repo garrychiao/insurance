@@ -26,7 +26,9 @@ export default function PetsInsuranceList(props) {
         ...item
     })) ?? [], [data]);
     
-    const columns = insuranceItems.length > 0 ? Object.keys(pet_insurance_translation).map((i) => ({
+    let columns = insuranceItems.length > 0 ? Object.keys(pet_insurance_translation).filter(i => {
+        return !(i === 'admission' || i === 'surgery' || i === 'max_medical_fee' || i === 'appointment')
+    }).map((i) => ({
         title: pet_insurance_translation[i],
         dataIndex: i,
         key: i,
@@ -56,7 +58,7 @@ export default function PetsInsuranceList(props) {
             key: 'name',
         },
     ]
-
+    
     return (
     <Space direction='vertical' style={{display: 'flex'}}>
         <Link to='add'>
