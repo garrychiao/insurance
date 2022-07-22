@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import _ from 'lodash';
 import { Link } from 'react-router-dom';
-import { Space, Table, Typography, Button } from 'antd';
+import { Space, Table, Typography, Button, notification } from 'antd';
 import { useRequest } from 'ahooks';
-import { collection, getDocs } from 'firebase/firestore/lite';
+import { collection, doc, getDocs, deleteDoc } from 'firebase/firestore/lite';
 import { pet_insurance_translation } from '../config';
 import NumberFormat from 'react-number-format';
 import { useFirebaseProvider } from '../setup/firebase'
@@ -14,11 +14,23 @@ export default function PetsInsuranceList(props) {
 
     const { db } = useFirebaseProvider();
 
-    const { data, loading, run } = useRequest(async () => {
+    const { data, run:fetchList } = useRequest(async () => {
         const insurenceReference = collection(db, 'insurance');
         const insuranceSnapshot = await getDocs(insurenceReference);
         const insuranceList = insuranceSnapshot.docs.map(doc => doc.data());
         return insuranceList;
+    });
+
+    const { run:deleteInsurance } = useRequest(async (id) => {
+        await deleteDoc(doc(db, 'insurance', id));
+    }, {
+        manual: true,
+        onSuccess: () => {
+            notification.success({
+              message: `刪除成功`,
+            });
+            fetchList();
+          },
     });
 
     const insuranceItems = useMemo(() => data?.map((item, index) => ({
@@ -58,6 +70,33 @@ export default function PetsInsuranceList(props) {
             key: 'name',
         },
     ]
+
+    columns.push({
+        title: 'Timestamp',
+        width: 160,
+        key: 'timestamp',
+        dataIndex: 'timestamp',
+    })
+
+    columns.push({
+        title: 'Last Modified',
+        width: 160,
+        key: 'last_modified',
+        dataIndex: 'last_modified',
+    })
+
+    columns.push({
+        title: 'Actions',
+        fixed: 'right',
+        width: 160,
+        render: (_, record) => (<Space>
+            <Link to={record.doc_name}>
+                <Button>Edit</Button>
+            </Link>
+            <Button danger onClick={() => deleteInsurance(record.doc_name)}>Delete</Button>
+        </Space>),
+    })
+
     
     return (
     <Space direction='vertical' style={{display: 'flex'}}>
@@ -67,9 +106,10 @@ export default function PetsInsuranceList(props) {
             </Button>
         </Link>
         <Table 
+            size='small'
             scroll={{
                 x: 1200,
-                y: 500,
+                y: 600,
             }}
             dataSource={insuranceItems} 
             columns={columns} />

@@ -1,5 +1,5 @@
 import { Navigate, useRoutes } from 'react-router-dom';
-import { PetsInsurancePage, PetsInsuranceList, PetsInsuranceAdd } from './PetsInsurance'
+import { PetsInsurancePage, PetsInsuranceList, PetsInsuranceAdd, PetsInsuranceEdit } from './PetsInsurance'
 
 
 export default function useAppRoutes() {
@@ -16,10 +16,10 @@ export default function useAppRoutes() {
           path: 'add',
           element: <PetsInsuranceAdd />,
         },
-        // {
-        //   path: ':id',
-        //   element: <TemplateEditPage />,
-        // },
+        {
+          path: ':id',
+          element: <PetsInsuranceEdit />,
+        },
         // {
         //   path: 'new',
         //   element: <TemplateEditPage isNew />,

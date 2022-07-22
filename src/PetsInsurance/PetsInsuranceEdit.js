@@ -2,51 +2,66 @@ import { useRequest } from 'ahooks';
 import {
     Button, Form, Input, Switch, notification
 } from 'antd';
-import { doc, setDoc } from 'firebase/firestore/lite';
+import { doc, setDoc, getDoc } from 'firebase/firestore/lite';
 import { useFirebaseProvider } from '../setup/firebase'
 import { pet_insurance_translation } from '../config';
 import moment from 'moment';
-import { useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
 
-export default function PetsInsuranceAdd(props) {
+export default function PetsInsuranceEdit(props) {
 
     const [form] = Form.useForm();
     const navigate = useNavigate();
     const { db } = useFirebaseProvider();
+    const { id } = useParams();
 
     // console.log(moment().format('YYYY-MM-DD HH:mm:ss'));
+    useRequest(async () => {
+        const insurenceRes = await getDoc(doc(db, "insurance", id))
+        return insurenceRes.data() ?? {};
+    }, {
+        onSuccess: (insuranceData) => {
+            const initialValues = {
+                ...insuranceData,
+                appointment: insuranceData?.medical_fee?.appointment,
+                admission: insuranceData?.medical_fee?.admission,
+                surgery: insuranceData?.medical_fee?.surgery,
+                max_medical_fee: insuranceData?.medical_fee?.max_medical_fee,
+                valid_age: insuranceData?.valid_age?.join(",") ?? '0,0',
+            }
+            form.setFieldsValue(initialValues);
+        }
+    });
+
     // add reference
     const { run:addInsurance } = useRequest(async (values) => {
-        const { insurance_category, sub_category, issued_by } = values
-        const docName = `${insurance_category}-${sub_category}-${issued_by}-${moment().format('x')}`;
-        const insurenceAddRes = await setDoc(doc(db, "insurance", docName), {
+        console.log(values)
+        const insurenceAddRes = await setDoc(doc(db, "insurance", id), {
+            doc_name: id,
             ...values,
-            doc_name: docName,
-            timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
             last_modified: moment().format('YYYY-MM-DD HH:mm:ss'),
-        })
+        }, { merge: true })
         return insurenceAddRes;
     }, {
         manual: true,
         onSuccess: () => {
             // console.log(msg);
             notification.success({
-              message: `新增成功`,
+              message: `更新成功`,
             });
             navigate('../');
-        },
+          },
     });
 
     const onSubmit = () => {
 
         let values = form.getFieldsValue(1);
-        console.log(values);
         values.medical_fee = {
-            admission: values.admission,
-            appointment: values.appointment,
-            max_medical_fee: values.max_medical_fee,
-            surgery: values.surgery,
+            admission: values.admission ?? null,
+            appointment: values.appointment ?? null,
+            max_medical_fee: values.max_medical_fee ?? null,
+            surgery: values.surgery ?? null,
         }
 
         delete values.admission
@@ -59,7 +74,7 @@ export default function PetsInsuranceAdd(props) {
                 values[k] = null
             }
         });
-
+        
         const formattedValues = {
             ...values,
             valid_age: values.valid_age.split(',').map(i => parseFloat(i)),
@@ -67,27 +82,6 @@ export default function PetsInsuranceAdd(props) {
 
         addInsurance(formattedValues);
 
-    }
-
-    const initialValues = {
-        name: '保單名稱 Demo',
-        insurance_category: '產險-寵物險',
-        sub_category: '狗',
-        issued_by: '國泰易安網',
-        medical_fee: 10000,
-        appointment: 10000,
-        admission: 10000,
-        surgery: 10000,
-        max_medical_fee: 10000,
-        harm: 10000,
-        accommodation: 10000,
-        seek: 10000,
-        funeral: 10000,
-        regain: 10000,
-        trip_cancel: 10000,
-        valid_age: '8,152',
-        max_weekly_renewal: 806,
-        certificates: true,
     }
 
     return (
@@ -106,7 +100,6 @@ export default function PetsInsuranceAdd(props) {
                 span: 14,
             }}
             layout="horizontal"
-            initialValues={initialValues}
         >
             {
                 Object.keys(pet_insurance_translation).map(key => {
